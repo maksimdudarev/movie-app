@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,6 +7,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using movie_app.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace movie_app
 {
@@ -22,6 +25,16 @@ namespace movie_app
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<CookiePolicyOptions>(options =>
+            {
+                // This lambda determines whether user consent for non-essential cookies is needed for a given request.
+                options.CheckConsentNeeded = context => true;
+                options.MinimumSameSitePolicy = SameSiteMode.None;
+            });
+
+            services.AddDbContext<MvcMovieContext>(options =>
+            options.UseMySql(Configuration.GetConnectionString("MovieContext")));
+
             services.AddControllersWithViews();
         }
 
@@ -39,14 +52,15 @@ namespace movie_app
             app.UseStaticFiles();
 
             app.UseRouting();
-
-            app.UseAuthorization();
+            //app.UseAuthorization();
+            
+            app.UseCookiePolicy();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
                     name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                    pattern: "{controller=Movies}/{action=Index}/{id?}");
             });
         }
     }
